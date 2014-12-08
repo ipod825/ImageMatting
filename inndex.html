@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>2013 VFX Final Project</title>
+<script type="text/javascript" src="js/jquery-latest.js"></script>
+<script type="text/javascript" src="js/jquery.layout-latest.js"></script>
+<script type="text/javascript">
+$(document).ready(function () {
+	$('body').layout({ applyDemoStyles: true });
+});
+</script>
+</head>
+<body>
+<div class="ui-layout-center">
+   <h2>Introduction</h2>
+Matting refers to the process of extracting foreground object from an image. Matting tasks usually produces a "matte" that can be used to separate foreground from the background in a given image. Matte can also used to combine a given foreground on a different background to produce new plausible image.
+We've implement an image matting system with user-friendly interface. Two image mating algorithm including the close form solution method and the  conjugate gradient method
+are adopted in our system. 
+
+    <h2>User interface</h2>
+    Close form solution algorithm requires only scribles from the users. We implement a user-friendly interfae for the users to add scribles onto the image. Users can also adjust the size of the brush to fastly select a wide range of area. The image below is how a user add scribbles to an image.
+	
+</br><img src=img/ui.png></br>
+
+    <h2>Close Form Solution</h2>
+	In Matting problem. An image is depicted as the combination of a foreground and background. Each pixels follow the matting equation:
+	<p>
+            	Ii = αi*Fi + (1-αi)*Bi,
+	</p>
+	where Ii,  αi, Fi, Bi, respectively represents to the the composite value, the matte value, the foreground value, the back ground value of pixel i.All variable on the right of the matting equation are unknown. Hence the problem is under-constrained.  So a rough segmentation of foreground and background is required to extract a good matte. This segmentation can be in form of trimap or scribbles.</br></br>
+
+The close form solution is a scribble based matting algorithm. It makes two assumptions:
+<p>
+(1) F and B are locally smooth over a small window.</br>
+(2) Each of F and B is a linear mixture of two colors in a small window.
+</p>
+By assumption(1), we could rewrite the matting equation as:
+	<p>
+	αi = a*Ii + b	∀i∈w, where w is a small window</br>
+	a = 1/F-B</br>
+	b = -B/F-B</br>
+	</p>
+Our goal is to find a set of parameters (α, a, b) that minimizes the cost function 
+</br><img src=img/cost_func.png></br>
+,where w is a small window.
+A 3X3 window is adopted to enable  propagation of the information between neighbouring pixels. The cost function is quadratic in α, a and b, with 3N unknowns for an image with N pixels. However, a and b may be eliminated , leaving us with a quadratic cost in only N unknown alpha values of the pixels:
+J (α) = α’ L α, where a’ is the transpose of α
+where L is an N × N matrix, whose (i, j)-th entry is:
+</br><img src=img/laplacian.png></br>
+
+For color images we replace the linear model with a 4D linear model assuming that for a small window each of F and B is a linear combination of two colors.
+
+With 4D linear model the cost function is define as:
+</br><img src=img/cost_func_c.png></br>
+The equation for Matting Laplacian in color line model becomes:
+</br><img src=img/laplacian.png></br>
+
+The cost function can be optimized by solving a sparse linear system:
+</br><img src=img/linearsystem.png></br>
+
+
+
+<h2>Conjugate gradient method</h2>
+        We already know the final step of close-form algorithm is to solve the sparse linear system. Conjugate gradient (CG) is another way to solve it. The conjugate gradient method is an iterative, so it can be applied to sparse systems that are too large to be handled by direct methods. (like mention above) </br>
+        The algorithm is detailed below for solving Ax = b where A is a real, symmetric, positive-definite matrix. The input vector x0 can be an approximate initial solution or 0. In our project, A=(L+lambda*D) and B = lambda*D*beta </br>
+
+</br><img src=img/CGflow.png></br>
+
+<h2>Experiment Result</h2>
+        First Result is a picture of a kid. The foreground and background has a relatively bigger contrast, such as the kid’s brown hair and her mothers green clothes. Therefore, we don’t need to draw a lot of scribbles to achieve our result. 
+</br><img src=img/kid_result.png></br>
+
+        Second Result is a picture of a pineapple. Since it’s texture is similar to the back ground, we can find the scibbles in the first picture sets aren’t enough. The pixels in the upper left side cannot be distinguished properly. Then, we add some scibbles in the second picture sets to make the result better. 
+
+</br><img src=img/pineapple_result.png></br>
+</br><img src=img/pineapple_result2.png></br>
+
+        Third Result is a picture of a plant. The leaves of the plant have a lot of boundaries along with the background. Because that the color is so different between them, the result is still good.
+</br><img src=img/plant_result.png></br>
+        
+<h2>Reference</h2>
+[1] Levin, Anat, Dani Lischinski, and Yair Weiss. "A closed-form solution to natural image matting." Pattern Analysis and Machine Intelligence, IEEE Transactions on 30.2 (2008): 228-242.</br>
+[2] He, Kaiming, Jian Sun, and Xiaoou Tang. "Fast matting using large kernel matting laplacian matrices." Computer Vision and Pattern Recognition (CVPR), 2010 IEEE Conference on. IEEE, 2010.</br>
+[3] http://www.alphamatting.com</br>
+</br>
+</div>
+<div class="ui-layout-north">
+    <center><h1>VFX 2013 Final Project<h1></center>
+	<center><h2>Image Matting with Close Form And Conjugate Gradient Method<h1></center>
+</div>
+<div class="ui-layout-west">
+<div>
+Members:</br>
+R01921055 王士銘</br>
+R01943092 林奕憲</br>
+</div>
+</div>
+</body>
+</html>
